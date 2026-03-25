@@ -1,0 +1,86 @@
+model:
+  model_type: const_sde
+  model_name: cond_unet
+  image_size: [256, 256]
+  input_keys: ['image', 'cond']
+  ckpt_path: null 
+  ignore_keys: []
+  only_model: false
+ 
+  timesteps: 1000
+  train_sample: -1
+  sampling_timesteps: 5  
+  loss_type: l2
+  objective: pred_KC
+  start_dist: normal
+  perceptual_weight: 0
+  scale_factor: 0.3
+  scale_by_std: true
+  default_scale: true
+  scale_by_softsign: false
+  eps: 0.0001
+  weighting_loss: false
+  
+  first_stage:
+    embed_dim: 3
+    lossconfig:
+      disc_start: 50001
+      kl_weight: 0.000001
+      disc_weight: 0.5
+      disc_in_channels: 1
+    ddconfig:
+      double_z: true
+      z_channels: 3
+      resolution: [256, 256]
+      in_channels: 1
+      out_ch: 1
+      ch: 128
+      ch_mult: [1, 2, 4]
+      num_res_blocks: 2
+      attn_resolutions: []
+      dropout: 0.0
+    ckpt_path: '/home/zxguo/RadioDiff_1/model-30.pt'  
+    
+  unet:
+    dim: 128
+    cond_net: swin
+    channels: 3
+    out_mul: 1
+    dim_mults: [1, 2, 4, 4]
+    cond_in_dim: 3
+    cond_dim: 128
+    cond_dim_mults: [2, 4]
+    window_sizes1: [[8, 8], [4, 4], [2, 2], [1, 1]]
+    window_sizes2: [[8, 8], [4, 4], [2, 2], [1, 1]]
+    fourier_scale: 16
+    cond_pe: false
+    num_pos_feats: 128
+    cond_feature_size: [80, 80]
+
+data:
+  name: radio
+  data_dir: '/home/zxguo/RadioDiff_1/data/'
+  simulation: 'IRT4' 
+  numTx: 2
+  thresh: 0.2
+
+  batch_size: 2    
+  num_workers: 4
+  pin_memory: true
+
+sampler:
+  sample_type: "whole"
+  stride: [128, 128]
+  batch_size: 2      
+  sample_num: 200    
+  use_ema: false    
+  save_folder: '/home/zxguo/RadioDiff_1/results_final/IRT4_car_dir'
+  ckpt_path: '/home/zxguo/RadioDiff_1/results/finetune_test_no_sparse_110_final_car/model-40.pt' 
+  target_path: '/home/zxguo/RadioDiff_1/data/gain/IRT4'  
+  
+ 
+  test_mode: true
+  small_sample_test: false
+  num_test_samples: 200  
+  save_individual: true  
+  compute_metrics: true  

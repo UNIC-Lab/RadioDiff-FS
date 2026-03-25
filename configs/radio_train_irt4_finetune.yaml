@@ -1,0 +1,121 @@
+model:
+  model_name: 'cond_unet'
+  model_type: 'const_sde'
+  ckpt_path: null
+  image_size: [256, 256]
+  timesteps: 500
+  sampling_timesteps: 5
+  loss_type: 'l2'
+  objective: 'pred_KC'
+  scale_factor: 0.3
+  scale_by_std: true
+  scale_by_softsign: false
+  default_scale: true
+  input_keys: ['image', 'cond']
+  ignore_keys: []
+  only_model: false
+  start_dist: 'normal'
+  perceptual_weight: 0
+  use_l1: true
+  use_disloss: true
+  weighting_loss: true
+  train_sample: -1
+  eps: 0.0001
+
+  first_stage:
+    ckpt_path: '/home/zxguo/RadioDiff_1/model-30.pt'
+    embed_dim: 3
+    ddconfig:
+      in_channels: 1
+      out_ch: 1
+      z_channels: 3
+      resolution: [256, 256]
+      ch: 128
+      ch_mult: [1, 2, 4]
+      num_res_blocks: 2
+      attn_resolutions: []
+      dropout: 0.0
+      double_z: true
+    lossconfig:
+      disc_in_channels: 1
+      disc_start: 50001
+      disc_weight: 0.5
+      kl_weight: 0.000001
+
+  unet:
+    dim: 128
+    channels: 3
+    cond_in_dim: 3
+    cond_dim: 128
+    cond_dim_mults: [2, 4]
+    cond_feature_size: [80, 80]
+    cond_net: 'swin'
+    cond_pe: false
+    input_size: [80, 80]
+    num_pos_feats: 128
+    dim_mults: [1, 2, 4, 4]
+    window_sizes1: [[8, 8], [4, 4], [2, 2], [1, 1]]
+    window_sizes2: [[8, 8], [4, 4], [2, 2], [1, 1]]
+    fourier_scale: 16
+    fix_bb: false
+    out_mul: 1
+    learned_variance: false
+    phase_threshold: 0.5
+    cond_boost_factor: 0.3
+
+data:
+  name: 'radio'
+  data_dir: '/home/zxguo/RadioDiff_1/data/'
+  simulation: 'IRT4'
+  numTx: 2
+  thresh: 0.2
+  num_samples: 300
+  batch_size: 32
+  num_workers: 16
+  pin_memory: true
+  persistent_workers: true
+  prefetch_factor: 4
+
+trainer:
+  pretrained_ckpt_path: '/home/zxguo/RadioDiff_1/results/model-250.pt'
+  lr: 0.00005
+  min_lr: 0.000005
+  train_num_steps: 20000
+  gradient_accumulate_every: 2
+  save_and_sample_every: 500
+  results_folder: '/home/zxguo/RadioDiff_1/results/LDM_IRT4_Finetune_4'
+  progressive_training: true
+  stage1_end: 2000
+  stage2_end: 6000
+  directional_weight: 0.1
+  lowt_weight: 1.5
+  use_directional_loss: true
+  phase_threshold: 0.5
+  cond_boost_factor: 0.3
+  use_inception_features: true
+  inception_model_name: 'inceptionv3'
+  inception_feature_dim: 2048
+  inception_features_list: ['2048']
+  amp: false
+  fp16: false
+  log_freq: 50
+  test_before: true
+  resume_milestone: 164
+  enable_resume: true
+  optimizer: 'adamw'
+  weight_decay: 0.01
+  betas: [0.9, 0.999]
+  lr_scheduler: 'cosine'
+  warmup_steps: 200
+  ema_update_after_step: 1000
+  ema_update_every: 2
+  dir_estimate_batches: 8
+  fine_tune_mode: true
+  freeze_encoder: false
+  freeze_unet: false
+  freeze_vae: false
+  early_stopping: true
+  patience: 1000
+  min_delta: 0.001
+  lr_decay_factor: 0.5
+  lr_decay_patience: 1000
