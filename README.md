@@ -38,6 +38,7 @@ accelerate config # HOW MANY GPUs YOU WANG TO USE.
 ```
 ## :tada: Training
 1. train the first stage model (AutoEncoder):
+~~~
 accelerate launch train_vae.py --cfg ./configs/first_radio.yaml
 ~~~
 2. train latent diffusion-edge model:
